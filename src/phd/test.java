@@ -12,7 +12,7 @@ import java.util.HashSet;
  * @author Administrator
  */
 public class test {
-
+ 
 public static void den1 (int i){
      
  i++;
