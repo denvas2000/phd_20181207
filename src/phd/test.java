@@ -28,7 +28,7 @@ public static void main(String[] args) {
 
 int k;    
 String a="aaa"+5+"aaa";
-int i=2;
+int i=2,j;
 Boolean input = Boolean.valueOf("1>2");
 HashSet<Integer> aSet =new HashSet<Integer>();
 
@@ -83,8 +83,15 @@ for (int s: aSet) {
       System.out.println("Number = " + s);
 }
 
+for (int s: aSet) {
+      System.out.println("Number = " + s);
 }
 
 
+
+for (j=0;j<=2;j++) {
+    aSet.
+    System.out.println("Number = " + aSet[i].);
+}
 
 }
