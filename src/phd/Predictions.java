@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 
 /**
@@ -42,7 +43,7 @@ int totalUsers,
 int totalMovies,
 List<UserSimilarity>[] userSim,
 User[] Users,
-UserMovie[][] userMovies,
+Hashtable<CellCoor,UserMovie>  userMovies,
 int predictionSign,
 int bestNeigh)
 
@@ -55,6 +56,8 @@ double Numerator_Pred, Denominator_Pred;            //Numerator and Denominator 
 int predictedValues=0, revPredictedValues=0, NO3RevPredictedValues=0;    //The total number of actually predicted values
 double MAE=0.0, RevMAE=0.0, NO3RevMAE=0.0;                         //Mean Absolute Error of Prediction.
 int minSimNeigh=0;
+CellCoor cell = new CellCoor();
+CellCoor cell1 = new CellCoor();
 
 for (i=0;i<=totalUsers;i++) 
 {
@@ -79,16 +82,18 @@ for (i=0;i<=totalUsers;i++)
 
         for (UserSimilarity io: UserList)
         {
-                    
-            if (userMovies[io.SUser_Id][k]!=null)
+            cell.user=io.SUser_Id;cell.movie=k;        
+            if (userMovies.get(cell)!=null)
             {  
                 Denominator_Pred += Math.abs((io.Similarity));
-                Numerator_Pred += io.Similarity*(userMovies[io.SUser_Id][k].getRating()-Users[io.SUser_Id].UserAverageRate());
+                Numerator_Pred += io.Similarity*(userMovies.get(cell).getRating()-Users[io.SUser_Id].UserAverageRate());
                         
-            }
-        }
-    }
-            
+            }//if
+        }//for
+    }//if
+    
+          
+    
     if (Denominator_Pred==0)                                            //Special Condition. When there are no NN that rated LastMovie or
         if (predictionSign==0)                                          //there are no NNs
             Users[i].setPrediction(Global_Vars.NO_PREDICTION);                      
@@ -106,8 +111,9 @@ for (i=0;i<=totalUsers;i++)
             if (Users[i].getPrediction()>5) Users[i].setPrediction(5);
             else
             if ((Users[i].getPrediction()<1) && (Users[i].getPrediction()!=Global_Vars.NO_PREDICTION))Users[i].setPrediction(1);                
-                    
-            MAE += Math.abs(Users[i].getPrediction()-userMovies[i][Users[i].lastMovieId].getRating());
+            
+            cell.user=i;cell.movie=Users[i].lastMovieId;              
+            MAE += Math.abs(Users[i].getPrediction()-userMovies.get(cell).getRating());
             predictedValues++;
         }
         else 
@@ -118,8 +124,9 @@ for (i=0;i<=totalUsers;i++)
                 if (Users[i].getRevPrediction()>5) Users[i].setRevPrediction(5);
                 else
                 if ((Users[i].getRevPrediction()<1) && (Users[i].getRevPrediction()!=Global_Vars.NO_PREDICTION)) Users[i].setRevPrediction(1);          
-                    
-                RevMAE += Math.abs(Users[i].getRevPrediction()-userMovies[i][k].getRating());
+
+                cell.user=i;cell.movie=k;              
+                RevMAE += Math.abs(Users[i].getRevPrediction()-userMovies.get(cell).getRating());
                 revPredictedValues++;
             }
             else
@@ -130,7 +137,8 @@ for (i=0;i<=totalUsers;i++)
                 else
                 if ((Users[i].getNO3RevPrediction()<1) && (Users[i].getNO3RevPrediction()!=Global_Vars.NO_PREDICTION)) Users[i].setNO3RevPrediction(1);   
 
-                NO3RevMAE += Math.abs(Users[i].getNO3RevPrediction()-userMovies[i][k].getRating());
+                cell.user=i;cell.movie=k;           
+                NO3RevMAE += Math.abs(Users[i].getNO3RevPrediction()-userMovies.get(cell).getRating());
                 NO3RevPredictedValues++;     
             }
             
@@ -141,24 +149,34 @@ return new double[] {simNeighbors, revSimNeighbors, NO3RevSimNeighbors, predicte
 
 } //END OF METHOD Compute_Prediction 
 
+/*
+Function POSITIVE PREDICTION
+For each user, predict the rating of the last item he rated, with the help of the ratings of its similar neighbors.
+*/
+
 public static double[] Positive_Prediction (
 int totalUsers, 
 int totalMovies,
 List<UserSimilarity>[] userSim,
 User[] users,
-UserMovie[][] userMovies,
+Hashtable<CellCoor,UserMovie>  userMovies,
 int bestNeigh)
 
 {
 
 int i, k, l;    
 int simNeighbors=0;
-List<UserSimilarity> UserList = new ArrayList<>();
+List<UserSimilarity> UserList;
 double Numerator_Pred, Denominator_Pred;            //Numerator and Denominator of Prediction function.
-int predictedValues=00;    //The total number of actually predicted values
-double MAE=0.0;                         //Mean Absolute Error of Prediction.
+int predictedValues=0;                              //The total number of actually predicted values
+double MAE=0.0;                                     //Mean Absolute Error of Prediction.
 int minSimNeigh=0;
+CellCoor cell = new CellCoor();                     //UserMovie coordinates
+CellCoor cell1 = new CellCoor();
 
+/*
+    Scan all users 
+*/
 for (i=0;i<=totalUsers;i++) 
 {
 
@@ -166,44 +184,58 @@ for (i=0;i<=totalUsers;i++)
     
     Numerator_Pred=0;Denominator_Pred=0;
     k=users[i].lastMovieId;
-            
-    //if (!UserList.isEmpty()) 
-    if (UserList.size()>minSimNeigh) 
+
+/*
+    1.For each  user i, whose last rated item is the "k", with at least "minSimNeigh" similar (positive)r neighbors.
+    2.Keep the first "bestNeigh" more similar neighbors
+    3.For each neightbor that has rated the item "k"
+    4.estimate its contribution to the prediction function
+    5.if there is no contribution .. move on, else
+    6.Estimate prediction (in valid boundaries) 
+    7.Estimate MAE
+ */    
+ 
+//if (!UserList.isEmpty()) 
+    if (UserList.size()>minSimNeigh) //Step 1
     {   
-        if (bestNeigh<userSim[i].size())
+        if (bestNeigh<userSim[i].size())                    //Step 2
             UserList=userSim[i].subList(0, bestNeigh-1);
         
         simNeighbors++;
         
-        for (UserSimilarity io: UserList)
+        for (UserSimilarity io: UserList)                   
         {
-                    
-            if (userMovies[io.SUser_Id][k]!=null)
+            cell.user=io.SUser_Id;cell.movie=k;
+            if (userMovies.get(cell)!=null)                 //Step 3
             {  
-                Denominator_Pred += Math.abs((io.Similarity));
-                Numerator_Pred += io.Similarity*(userMovies[io.SUser_Id][k].getRating()-users[io.SUser_Id].UserAverageRate());
+                Denominator_Pred += Math.abs((io.Similarity));  //Step 4
+                Numerator_Pred += io.Similarity*(userMovies.get(cell).getRating()-users[io.SUser_Id].UserAverageRate());
                         
-            }
-        }
-    }
+            }//if userMovies.get
+        }//for UserSimilarity
+    }//if serList.size
             
-    if (Denominator_Pred==0)                                            //Special Condition. When there are no NN that rated LastMovie or
+    if (Denominator_Pred==0)                                    //Step 5: Special Condition. When there are no NN that rated LastMovie or
         users[i].setPrediction(Global_Vars.NO_PREDICTION);                      
-    else    //Maybe the check "!=NO_PREDICTION" is unnecessary
+    else    //Maybe the check "!=NO_PREDICTION" is unnecessary  //Step 6
     {
             users[i].setPrediction((int)Math.round(users[i].UserAverageRate()+Numerator_Pred/Denominator_Pred));  //Normal Condition. When there are NN that rated LastMovie
                     
             if (users[i].getPrediction()>5) users[i].setPrediction(5);
             else
-            if ((users[i].getPrediction()<1) && (users[i].getPrediction()!=Global_Vars.NO_PREDICTION))users[i].setPrediction(1);                
-                    
-            MAE += Math.abs(users[i].getPrediction()-userMovies[i][users[i].lastMovieId].getRating());
+            if ((users[i].getPrediction()<1) && (users[i].getPrediction()!=Global_Vars.NO_PREDICTION))users[i].setPrediction(1);         
+            
+            cell.user=i;cell.movie=users[i].lastMovieId;        
+            MAE += Math.abs(users[i].getPrediction()-userMovies.get(cell).getRating());     //Step 7
+            //System.out.println(i+" "+MAE);
             predictedValues++;
-    }
+    } //else
             
     UserList=new ArrayList<>();
     
-}    
+} //for i
+
+//Return: Number of users having sim neigh, Number of users having prediction for last item, MAE for the predictions 
 return new double[] {simNeighbors, predictedValues, MAE};
 
 } //END OF METHOD Positive_Prediction 
@@ -223,7 +255,7 @@ List<UserSimilarity>[] posSim,
 List<UserSimilarity>[] negSim,
 List<UserSimilarity>[] comSim,
 User[] Users,
-UserMovie[][] userMovies,
+Hashtable<CellCoor,UserMovie>  userMovies,
 int bestNeigh)              //Select just the "bestNeigh" (absolute number of most similar heighbors)
 
 {
@@ -245,6 +277,8 @@ Iterator<UserSimilarity> itr;
 UserSimilarity tempSim =new UserSimilarity();
 int temp=0, pos=0, neg=0;
 int minSimNeigh=0;
+CellCoor cell = new CellCoor();
+CellCoor cell1 = new CellCoor();
 
 for (i=0;i<=totalUsers;i++) 
 {
@@ -305,28 +339,30 @@ for (i=0;i<=totalUsers;i++)
         
         for (UserSimilarity io: combinedList)
         {
-                    
-            if (userMovies[io.SUser_Id][k]!=null)
+                   
+            cell.user=io.SUser_Id;cell.movie=k;
+            if (userMovies.get(cell)!=null)
             {  
                 if (io.flag==1) pos++; else neg++;
                 Denominator_Pred += io.GetCombinedSimilarity();
-                Numerator_Pred += io.GetCombinedSimilarity()*(userMovies[io.SUser_Id][k].getRating()-Users[io.SUser_Id].UserAverageRate());
+                Numerator_Pred += io.GetCombinedSimilarity()*(userMovies.get(cell).getRating()-Users[io.SUser_Id].UserAverageRate());
                         
-            }
-        }
-    }
+            }// if userMovies
+        }// for UserSimilarity
+    }//if combinedList
             
     if (Denominator_Pred==0)                                            //Special Condition. When there are no NN that rated LastMovie or
         Users[i].combinedPrediction=Global_Vars.NO_PREDICTION;           //there are no NNs
     else    //Maybe the check "!=NO_PREDICTION" is unnecessary
     {
         Users[i].combinedPrediction=(int)Math.round(Users[i].UserAverageRate()+Numerator_Pred/Denominator_Pred);  //Normal Condition. When there are NN that rated LastMovie
-                    
+        
         if (Users[i].combinedPrediction>5) Users[i].combinedPrediction=5;
         else
         if ((Users[i].combinedPrediction<1) && (Users[i].combinedPrediction!=Global_Vars.NO_PREDICTION))Users[i].combinedPrediction=1;                
-                    
-        combinedMAE += Math.abs(Users[i].combinedPrediction-userMovies[i][Users[i].lastMovieId].getRating());
+        
+        cell.user=i;cell.movie=Users[i].lastMovieId;
+        combinedMAE += Math.abs(Users[i].combinedPrediction-userMovies.get(cell).getRating());
         predictedValues++;
     }
             
@@ -345,18 +381,20 @@ int totalUsers,
 int totalMovies,
 List<UserSimilarity>[] userSim,
 User[] Users,
-UserMovie[][] userMovies,
+Hashtable<CellCoor,UserMovie>  userMovies,
 int bestNeigh)
 
 {
 
 int i, k, l;    
 int simNeighbors=0;
-List<UserSimilarity> UserList = new ArrayList<>();
+List<UserSimilarity> UserList;
 double Numerator_Pred, Denominator_Pred;            //Numerator and Denominator of Prediction function.
-int predictedValues=00;    //The total number of actually predicted values
+int predictedValues=0;    //The total number of actually predicted values
 double MAE=0.0;                         //Mean Absolute Error of Prediction.
 int minSimNeigh=0;
+CellCoor cell = new CellCoor();
+CellCoor cell1 = new CellCoor();
 
 for (i=0;i<=totalUsers;i++) 
 {
@@ -376,15 +414,16 @@ for (i=0;i<=totalUsers;i++)
         
         for (UserSimilarity io: UserList)
         {
-                    
-            if (userMovies[io.SUser_Id][k]!=null)
+            
+            cell.user=io.SUser_Id;cell.movie=k;
+            if (userMovies.get(cell)!=null)
             {  
                 Denominator_Pred += Math.abs((io.Similarity));
-                Numerator_Pred += io.Similarity*(userMovies[io.SUser_Id][k].getRating()-Users[io.SUser_Id].UserAverageRate());
+                Numerator_Pred += io.Similarity*(userMovies.get(cell).getRating()-Users[io.SUser_Id].UserAverageRate());
                         
-            }
-        }
-    }
+            }// userMovies
+        } // UserSimilarity
+    }// UserList
             
     if (Denominator_Pred==0)                                            //Special Condition. When there are no NN that rated LastMovie or
         Users[i].setPrediction(Global_Vars.NO_PREDICTION);                      
@@ -395,8 +434,10 @@ for (i=0;i<=totalUsers;i++)
             if (Users[i].getPrediction()>5) Users[i].setPrediction(5);
             else
             if ((Users[i].getPrediction()<1) && (Users[i].getPrediction()!=Global_Vars.NO_PREDICTION))Users[i].setPrediction(1);                
-                    
-            MAE += Math.abs(Users[i].getPrediction()-userMovies[i][Users[i].lastMovieId].getRating());
+             
+            cell.user=i;cell.movie=Users[i].lastMovieId;
+            MAE += Math.abs(Users[i].getPrediction()-userMovies.get(cell).getRating());
+            //System.out.println(i+" "+MAE);
             predictedValues++;
     }
             

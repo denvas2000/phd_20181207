@@ -15,11 +15,11 @@ public class UserMovie {
     
 public int User_Id;
 public int Movie_Id;
-private int Rating;
+public int Rating;
 public int invRating;
-private double negWeight; //NOT NEEDED
+public double negWeight; //NOT NEEDED
 public int Time_Stamp;
-private double Weight;
+public double Weight;
 
 
 //class constructor;

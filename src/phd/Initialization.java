@@ -10,6 +10,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Set;
 import java.util.Scanner;
 import phd.Global_Vars;
 
@@ -96,6 +98,67 @@ for (i=0;i<=totalUsers;i++)
 } //for i
 
 } //END of class Compute_Inverse_Data
+//
+
+public static void Compute_Inverse(
+int totalUsers, 
+int totalMovies,
+User[] users, 
+Hashtable<CellCoor,UserMovie>  userMovies) {
+
+int i, j;
+int tempRating;
+int tempInvRating;
+int[] tempSum = new int[totalUsers+1];
+double[] tempAverage = new double[totalUsers+1];      
+double diff;
+int user,movie;
+UserMovie tempUserMovie;
+Set<CellCoor> keys;
+
+System.out.println("totaluser:"+totalUsers);
+System.out.println("totalmovies:"+totalMovies);
+
+
+for (i=0;i<=totalUsers;i++)
+{
+    //System.out.println("i"+i+" average"+users[i].UserAverageRate());
+    //System.out.println("i"+i);
+    tempAverage[i]=users[i].UserAverageRate();
+    tempSum[i]=0;
+}   
+
+keys=userMovies.keySet();
+for(CellCoor key: keys) {
+    
+    user=key.user;movie=key.movie;
+    tempUserMovie=userMovies.get(key);
+    //System.out.println("user id:"+user+", movie id:"+movie);
+    tempRating=tempUserMovie.getRating();
+    diff=tempAverage[user]-3;
+    tempInvRating=New_Rating(tempRating,diff);
+    tempSum[user]+=tempInvRating;
+    tempUserMovie.invRating=tempInvRating;
+    //if (user==22) System.out.println("user id:"+user+", movie id:"+movie+", tempRating:"+tempRating+", invRating:"+tempInvRating+", ObjectInvRating:"+userMovies.get(key).invRating);
+}
+
+for (i=0;i<=totalUsers;i++)
+    users[i].invRatingSum=tempSum[i];
+    
+ 
+
+/*
+int i1=0;    
+for (i=0;i<=totalUsers;i++)
+{
+i1+=tempSum[i];
+System.out.println(i+" "+tempSum[i]+" "+i1);
+
+    
+} //for i 
+*/
+} //END of class Compute_Inverse
+
 
 /* ***********************
 METHOD: Data_Initialisation_1M_OLD
@@ -640,8 +703,13 @@ try {   //Read Files. Initiate tables
         
 } //method Data_Initialisation_Amazon_Video_Games
 
-public static int[] Data_Initialisation_General(String dataFile, User[] users, UserMovie[][] userMovies, HashSet<Integer>[] usersRatingSet, int absMinTimeStamp, int absMaxTimeStamp)
-{
+public static int[] Data_Initialisation_General(
+String dataFile, 
+User[] users, 
+Hashtable<CellCoor,UserMovie>  userMovies,
+HashSet<Integer>[] usersRatingSet, 
+int absMinTimeStamp, 
+int absMaxTimeStamp) {
 
 String Line;                    //Each Line of the Text File
 Scanner Scan_Line;              //Line Scanner to find the data of each line of the Text File
@@ -670,14 +738,15 @@ int Previous_User=0;
 int Last_Movie=0;             //The Movie ID the UserID last, concerning time, rated
 
 int User_Ratings_Sum=0;       //Sum of all rating values of a single UseiID
-int Min_Time = 0;             //Min time stamp of a UseiID
-int Max_Time = 0;             //Max time stamp of a UseiID
+int Min_Time = Integer.MAX_VALUE;             //Min time stamp of a UseiID
+int Max_Time = Integer.MIN_VALUE;             //Max time stamp of a UseiID
 int maxRating=1;
 int minRating=5;
 
 int totalUsers=0;
 int totalMovies=0;
-        
+CellCoor cell = new CellCoor();
+
 try {   //Read Files. Initiate tables
 
     /* When a line has 3 nums it's (user, 0, num of user ratings)                           */
@@ -758,7 +827,7 @@ try {   //Read Files. Initiate tables
                 RatingTimeStamp=Nums_Line[3];
                 
                 if (totalMovies<MovieID) totalMovies=MovieID;   //Renew the total number of rated Movies, by all Users
-                                                                  //IF MOVIESIDs WERE NOT JUST INCREMENTAL, IT HAD TO BE TREATED DIFFERENTLY
+                                                                //IF MOVIESIDs WERE NOT JUST INCREMENTAL, IT HAD TO BE TREATED DIFFERENTLY
                 
                 //Running_Users_Rating++; //Next rating
                 
@@ -783,13 +852,18 @@ try {   //Read Files. Initiate tables
                 
                 //Create the main Users*Movies Table. Each cell holds the rating of a user to a
                 //specific movie.
-                userMovies[Running_User][MovieID]=new UserMovie(Running_User-1,MovieID-1,UserRating, RatingTimeStamp,0);
+                cell.user=Running_User;cell.movie=MovieID; //USELESS???????
+                
+                //userMovies.put(cell,new UserMovie(Running_User,MovieID,UserRating, RatingTimeStamp,0));
+                userMovies.put(new CellCoor(Running_User,MovieID),new UserMovie(Running_User,MovieID,UserRating, RatingTimeStamp,0));
+                //System.out.println("Size during initialization:"+userMovies.size());
+                //System.out.println(Running_User+" "+MovieID+" "+userMovies.get(cell).User_Id+" "+userMovies.get(cell).Movie_Id+" "+userMovies.get(cell).getRating());
 
             }//else if
             
         } // while (Line)
         
-        if (Running_User!=1)        //Handle (Create) last user 
+        if (Running_User!=0)        //Handle (Create) last user . HYPOTHESIS: There are more than 1 users (user 0)
         {
             //Initialize new user
             users[Running_User]= new User(Running_User, Last_Movie, RatingsSum, RatingsNum, NO3_RatingsSum, NO3_RatingsNum, 
@@ -798,7 +872,7 @@ try {   //Read Files. Initiate tables
             usersRatingSet[Running_User].addAll(userRatingSet);
         } 
         
-        totalUsers=Running_User-1;
+        totalUsers=Running_User;
         
         } // try 
         catch (IOException e) {
@@ -806,7 +880,8 @@ try {   //Read Files. Initiate tables
             e.printStackTrace();
 
 	} //catch file error
-        int[] mainStats={totalUsers, totalMovies-1};
+        System.out.println("Size during initialization:"+userMovies.size());
+        int[] mainStats={totalUsers, totalMovies};
         return mainStats;
         
 } //method Data_Initialisation_Amazon_Video_Games

@@ -15,18 +15,18 @@ public class User {
     
 public int UserId;            //Define Member Variables
 public int lastMovieId;
-private int ratingSum;
+public int ratingSum;
 public int invRatingSum;
-private int ratingNum;
-private int NO3RatingSum;
-private int NO3RatingNum;
-private int MinTimeStamp;
-private int MaxTimeStamp;
+public int ratingNum;
+public int NO3RatingSum;
+public int NO3RatingNum;
+public int MinTimeStamp;
+public int MaxTimeStamp;
 public int maxRating;
 public int minRating;
-private int Prediction;
-private int RevPrediction;
-private int NO3RevPrediction;
+public int Prediction;
+public int RevPrediction;
+public int NO3RevPrediction;
 public int negAverPrediction;
 public int combinedPrediction;
 

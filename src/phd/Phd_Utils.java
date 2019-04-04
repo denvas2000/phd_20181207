@@ -18,24 +18,32 @@ package phd;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Set;
 
 public class Phd_Utils {
     
     
 /**
  * 
- * Strict_Similarities: Method to keep only similat neighbors that have rated last movieID
+ * Strict_Similarities: Method to keep only similar neighbors that have rated last movieID
  * 
  */
 
-public static void Strict_Similarities (int totalUsers, List<UserSimilarity>[] userSim, User[] Users, UserMovie[][] userMovies){
+public static void Strict_Similarities (
+int totalUsers, 
+List<UserSimilarity>[] userSim, 
+User[] Users, 
+Hashtable<CellCoor,UserMovie>  userMovies){
 
 int  i;
 int lastMovie;
 List<UserSimilarity> UserList = new ArrayList<>();
 Iterator<UserSimilarity> itr;
 UserSimilarity io;
+CellCoor cell = new CellCoor();
 
 //System.out.println("Print Similarities");
 
@@ -51,7 +59,8 @@ for (i=0;i<=totalUsers;i++)
         {
             io = new UserSimilarity();
             io = itr.next();
-            if (userMovies[io.SUser_Id][lastMovie]==null)
+            cell.user=io.SUser_Id;cell.movie=lastMovie;
+            if (userMovies.get(cell)==null)
                 itr.remove();
 
         }//while
@@ -88,19 +97,50 @@ return weight;
 
 }
 
-
-public static void Print_UserRatings(int totalUsers, int totalMovies, User[] Users, UserMovie[][] userMovies){
+public static void Print_UserItems(
+int totalUsers, 
+User[] users, 
+HashSet<Integer>[] usersRatingSet)
+{
+    
 int i, j;
 
 for (i=0; i<=totalUsers;i++) {
 
-System.out.println("User: "+i+" Ratings: "+Users[i].getRatingNum()+" Ratings Sum: "+Users[i].getRatingSum()+" Ratings Inv Sum: "+Users[i].invRatingSum+" Average: "+Users[i].UserAverageRate()+" Inv Average: "+Users[i].UserInvertedAverageRating()); 
-for (j=0; j<=totalUsers;j++) {
-    if (!(userMovies[i][j]==null)) 
-    {
-        System.out.println("Movie: "+j+" Rating: "+userMovies[i][j].getRating()+" Inv Rating: "+userMovies[i][j].invRating); 
+    System.out.println("\nUser: "+i+" Ratings: "+users[i].getRatingNum()+" Ratings Sum: "+users[i].getRatingSum()+" Ratings Inv Sum: "+users[i].invRatingSum+" Average: "+users[i].UserAverageRate()+" Inv Average: "+users[i].UserInvertedAverageRating()); 
+
+    for (int k: usersRatingSet[i]) {
+        //System.out.println("Size"+userMovies.size());
+        System.out.print(" "+k);
     }    
+        
 }
+
 }
+
+public static void Print_Ratings(
+int totalUsers, 
+int totalMovies, 
+User[] Users, 
+Hashtable<CellCoor,UserMovie>  userMovies)
+{
+    
+int i, j;
+CellCoor cell;
+
+Set<CellCoor> keys = userMovies.keySet();
+for (i=0; i<=totalUsers;i++) 
+     System.out.println("User: "+i+" Ratings: "+Users[i].getRatingNum()+" Ratings Sum: "+Users[i].getRatingSum()+" Ratings Inv Sum: "+Users[i].invRatingSum+" Average: "+Users[i].UserAverageRate()+" Inv Average: "+Users[i].UserInvertedAverageRating()); 
+
+for (CellCoor key: keys)
+{
+        //System.out.println("Size"+userMovies.size());
+        System.out.println("Value of:"+key.user+" "+key.movie+" is:"+userMovies.get(key).User_Id+" "+userMovies.get(key).Movie_Id + " Rating "+ userMovies.get(key).getRating()+" InvRating "+ userMovies.get(key).invRating);
+}    
+        
+
 }
+
+
+
 } //END class Phd_Utils
