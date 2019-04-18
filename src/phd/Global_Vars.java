@@ -15,9 +15,9 @@ static final int NO_PREDICTION=-10;    //"Prediction value" for items that canno
 static final int MAX_RATING=5;
 
 static final int SIMILARITY_BASE_LIMIT=0;   //Compute Similarity: Greater/Lesser or equal than .. (>= or <=)
-static final int SIMILARITY_UPPER_LIMIT=40;
+static final int SIMILARITY_UPPER_LIMIT=0;
 static final int NEGATIVE_SIMILARITY_BASE_LIMIT=0;         //FOR SIMPLE CALC BEST 20
-static final int NEGATIVE_SIMILARITY_UPPER_LIMIT=20;
+static final int NEGATIVE_SIMILARITY_UPPER_LIMIT=0;
 static final int NO3_NEGATIVE_SIMILARITY_BASE_LIMIT=0;
 static final int NO3_NEGATIVE_SIMILARITY_UPPER_LIMIT=0;   
 

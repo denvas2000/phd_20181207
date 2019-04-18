@@ -1,3 +1,0 @@
-AA	Similarity	RevSimilarity	NO3RevSimilarity	Min Common Movies	First Best Neighs	NN Predictions	NN Coverage	NN MAE Sum	NN MAE CF	FN Predictions	FN Coverage	FN MAE Sum	FN MAE CF	NO3 FN Predictions	NO3 FN Coverage	NO3 FN MAE Sum	NO3 Rev MAE CF	DenFN Predictions	DenFN Coverage	DenFN MAE Sum	DenRev MAE CF	Combined NN FN Predictions	NN FN Coverage	NN FN MAE Sum	NN FN MAE CF
-1	0.0	0.0	0.0	0	150	0	0.0	0.0	NaN	0	0.0	0.0	NaN	0	0.0	0.0	NaN	941	0.9978791092258749	475.0	0.5047821466524973	0	0.0	0.0	NaN
-2	0.2	0.0	0.0	0	150	0	0.0	0.0	NaN	0	0.0	0.0	NaN	0	0.0	0.0	NaN	941	0.9978791092258749	475.0	0.5047821466524973	0	0.0	0.0	NaN

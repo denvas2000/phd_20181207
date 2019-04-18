@@ -57,7 +57,7 @@ for (i=0;i<=totalUsers;i++)
     {   
         while (itr.hasNext())
         {
-            io = new UserSimilarity();
+            //io = new UserSimilarity();
             io = itr.next();
             cell.user=io.SUser_Id;cell.movie=lastMovie;
             if (userMovies.get(cell)==null)

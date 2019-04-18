@@ -139,7 +139,7 @@ UserMovie tempUM2;
 
 //Phd_Utils.Print_Ratings(totalUsers, totalMovies, users, userMovies);
 for (i=0;i<=totalUsers;i++) 
-    userSim[i]=new ArrayList<>();
+    userSim[i]=new ArrayList<>(); //Collections.synchronozedList(new ArrayList<>());
 
 for (i=0;i<=totalUsers-1;i++)
 {    
