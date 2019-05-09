@@ -66,7 +66,7 @@ import java.util.Hashtable;
  *
  * @author Administrator
  */
-public class Phd_Hub_Hashtable extends Global_Vars{
+public class Phd_Hub_Hashtable_Parallel extends Global_Vars{
         
 //Movielens 1M_Old
 static int MAX_USERS;                    //Maximum Users the program can handle
