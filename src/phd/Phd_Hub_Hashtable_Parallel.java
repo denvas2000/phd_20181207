@@ -1,5 +1,5 @@
 /*
-Version 2.0
+Version 2.1
 Main features:  Reads a text file with limited users/ratings, compared to initial dataset (over10_movielens_simple.rar - MovieLens 100K simple)
                 Calculates all data needed to perform NN-algorithm CF (reault a)*
                 Calculates all data needed to perform FN-algorithm CF (reverse Pearson - tranform ratings) (result b)
@@ -21,10 +21,9 @@ Main features:  Reads a text file with limited users/ratings, compared to initia
                 Improving ability to handle large data, through the use of hastables
                 One main class, for all data files. 
                 Time specific calculations, for improving time execution (see Classes for observations)                
+                PARALLEL COMPUTATIONS (working area: Find the similar users)
 
 Next Version:   Refine simulations for more elaborate results
-                Introduce Parallel programming (multithreading)
-                Time specific calculations, for improving time execution
                 Produce more stats concerning data
 
 ASSUMPTIONS     All files are pre-proccessed so as userid and movieid having increasing values (by 1)
@@ -69,9 +68,9 @@ import java.util.Hashtable;
 public class Phd_Hub_Hashtable_Parallel extends Global_Vars{
         
 //Movielens 1M_Old
-static int MAX_USERS;                    //Maximum Users the program can handle
-static final int MAX_MOVIES=27000;       //Maximum Movies the program can handle
-static final int TOTAL_RATINGS=100000;
+static int MAX_USERS;              //Maximum Users the program can handle
+static int MAX_MOVIES;       //Maximum Movies the program can handle
+//static final int TOTAL_RATINGS=100000;
 
 static User[] users;                                              //Store User Details (see class declaration)
 static Hashtable<CellCoor,UserMovie> userMovies;                  //Store User Ratings
@@ -89,6 +88,65 @@ switch(choice) {
 } //switch 
 
 }// Assign_Values
+
+public static void Thread_Similarities(
+int option,
+int totalUsers,
+List<UserSimilarity>[] userSim,
+User[] users,
+Hashtable<CellCoor,UserMovie> userMovies,
+HashSet<Integer>[] usersRatingSet,
+int similaritySign,
+double simBase,
+int commonMovies)
+{
+int i;
+Parallel_Sim PS1, PS2;
+Thread t1, t2;
+Thread[] threadPool = new Thread[THREADS];
+Parallel_Sim[] PS = new Parallel_Sim[THREADS];
+int lowbound=0;
+int upperbound=-1;
+
+//A. Similarities have to be synchronized, as THREAD functions may overlap
+for (i=0;i<=totalUsers;i++)
+    userSim[i]=Collections.synchronizedList(new ArrayList<>());
+
+// THREAD SECTION: SPLIT SIMILARITY COMPUTATIONS TO SEVERAL THREADS
+
+//B.Split Job to THREADS. Find low and upper bounds to assign task
+//  Create a threadpool of THREAD items
+
+for (i=0;i<=THREADS-1;i++)
+{
+    lowbound=upperbound+1;upperbound=(int)((i+1)*totalUsers/THREADS);
+    PS[i]= new Parallel_Sim(option,lowbound, upperbound, totalUsers, userSim, users, userMovies, usersRatingSet, similaritySign, simBase,commonMovies);
+    threadPool[i]= new Thread(PS[i],"t"+String.valueOf(i));
+}
+            usersRatingSet = new HashSet[MAX_USERS];
+            userMovies = new Hashtable(134999); 
+//  Start all threads
+for (i=0;i<=THREADS-1;i++)
+{
+    threadPool[i].start();
+}
+
+//  Wait all threads to come to an end
+try {
+    System.out.println("Waiting for threads to finish.");
+    for (i=0;i<=THREADS-1;i++)
+    {
+        threadPool[i].join();
+    }
+}
+catch (InterruptedException e) {
+    System.out.println("Main thread Interrupted");
+}
+
+System.out.println("ALL FINISHED");
+
+} //Thread_Similarities
+
 
 public static void Print_to_File(int choice){
 
@@ -140,7 +198,8 @@ int NO3TotalPredictedValues;
 int temp_prediction;                                //values holding current (rev)predictions
 int temp_rev_prediction;
 int temp_no3_rev_prediction;
-        
+
+int lowbound, upperbound;
 // Time stamps to calculate execution times
 long firstTime, totalTime, startTime, initTime, simTime1, simTime2, simTime3, simTime4, sortTime, strictTime, predTime1, predTime2, predTime3, predTime4, predTime5;
         
@@ -160,7 +219,7 @@ String outFileTiming = new String();
 // Initialize Main Variables
 //
 
-datasetSelection=3;
+datasetSelection=1;
 switch (datasetSelection) {
     case 1: datasetFile="/home/denis/Documents/Datasets/01.Movielens_100k_old/ratings_Movielens_100K_OLD_Sorted_Pure.txt";
             MAX_USERS= 945; 
@@ -168,8 +227,8 @@ switch (datasetSelection) {
             usersRatingSet = new HashSet[MAX_USERS];
             userMovies = new Hashtable(134999);    //Realsize/0.75 for good performance
                                                    //HAS to BE a PRIME or odd.I use 134999.
-            outFileResults="src/phd/Results/Results_Movielens_100K_Old_Hash.txt"; 
-            outFileTiming ="src/phd/Timings/Timing_Movielens_100K_Old_Hash.txt"; 
+            outFileResults="src/phd/Results/Results_Movielens_100K_Old_Hash_Parallel.txt"; 
+            outFileTiming ="src/phd/Timings/Timing_Movielens_100K_Old_Hash_Parallel.txt"; 
             break;
     case 2: datasetFile="/home/denis/Documents/Datasets/02.Movielens_1M_Old/ratings_MovieLens_1M_Old.txt";
             MAX_USERS= 6045; 
@@ -177,8 +236,8 @@ switch (datasetSelection) {
             usersRatingSet = new HashSet[MAX_USERS];
             userMovies = new Hashtable(1335991);    //Realsize/0.75 for good performance
                                                     //HAS to BE a PRIME or odd.I use 1335991.
-            outFileResults="src/phd/Results/Results_Movielens_1M_Old_Hash.txt"; 
-            outFileTiming ="src/phd/Timings/Timing_Movielens_1M_Old_Hash.txt"; 
+            outFileResults="src/phd/Results/Results_Movielens_1M_Old_Hash_Parallel.txt"; 
+            outFileTiming ="src/phd/Timings/Timing_Movielens_1M_Old_Hash_Parallel.txt"; 
             //You have to set Heapsize to at least 4096MB (-Xms4096m)
             break;
     case 3: datasetFile="/home/denis/Documents/Datasets/03.Amazon_Video_Games/ratings_Video_Games_Final.tab";
@@ -187,9 +246,9 @@ switch (datasetSelection) {
             usersRatingSet = new HashSet[MAX_USERS];
             userMovies = new Hashtable(210011);    //Realsize/0.75 for good performance
                                                     //HAS to BE a PRIME or odd.I use 1335991.
-            outFileResults="src/phd/Results/Results_Amazon_VG_Hash_Hub.txt"; 
-            outFileTiming ="src/phd/Timings/Timing_Amazon_VG_Hash_Hub.txt"; 
-            //You have to set Heapsize to at least 4096MB (-Xms4096m)
+            outFileResults="src/phd/Results/Results_Amazon_VG_Hash_Par.txt"; 
+            outFileTiming ="src/phd/Timings/Timing_Amazon_VG_Hash_Par.txt"; 
+            //You have to set Heapsize to at least 4096MB (-Xms8000m) in order to increase speed
             break;
     case 4: datasetFile="/home/denis/Documents/Datasets/01.Movielens_100k_old/ratings_Movielens_100K_OLD_Sorted.txt";break;
 } //switch
@@ -268,26 +327,28 @@ try(FileWriter outExcel = new FileWriter( outFileResults )) {
 
             TotalPredictedValues=0;NO3TotalPredictedValues=0;            
             NO3TotalMAE=0.0;TotalMAE=0.0;                                    
-            
+            US = new List[MAX_USERS];
             startTime=System.currentTimeMillis();           //Set new timer
-            Similarities.Positive_Similarity(totalUsers, totalMovies, US = new List[MAX_USERS], users, userMovies, usersRatingSet, (double)l/100, n); 
+            Thread_Similarities(1, totalUsers, US, users, userMovies, usersRatingSet, -1, (double)l/100,n);
+            //Similarities.Positive_Similarity(totalUsers, totalMovies, US = new List[MAX_USERS], users, userMovies, usersRatingSet, (double)l/100, n); 
             simTime1=startTime-System.currentTimeMillis();
             startTime=System.currentTimeMillis();           //Set new timer
-            Similarities.Compute_Similarity(totalUsers, totalMovies, RUS = new List[MAX_USERS], users, userMovies, usersRatingSet, 0, (double)-m/100, n);
+            Thread_Similarities(2, totalUsers, RUS = new List[MAX_USERS], users, userMovies, usersRatingSet, 0, (double)-m/100,n);
+            //Similarities.Compute_Similarity(totalUsers, totalMovies, RUS = new List[MAX_USERS], users, userMovies, usersRatingSet, 0, (double)-m/100, n);
             simTime2=startTime-System.currentTimeMillis();
             startTime=System.currentTimeMillis();           //Set new timer
-            Similarities.Compute_Similarity(totalUsers, totalMovies, NO3RUS = new List[MAX_USERS], users, userMovies, usersRatingSet, 2, (double)-m/100, n);
+            Thread_Similarities(2, totalUsers, NO3RUS = new List[MAX_USERS], users, userMovies, usersRatingSet, 2, (double)-m/100,n);
+            //Similarities.Compute_Similarity(totalUsers, totalMovies, NO3RUS = new List[MAX_USERS], users, userMovies, usersRatingSet, 2, (double)-m/100, n);
             simTime3=startTime-System.currentTimeMillis();
             startTime=System.currentTimeMillis();           //Set new timer
-            Similarities.Inverted_Similarity(totalUsers, totalMovies, INVUS = new List[MAX_USERS], users, userMovies, usersRatingSet, (double)m/100, n);
+            Thread_Similarities(3, totalUsers, INVUS = new List[MAX_USERS], users, userMovies, usersRatingSet, -1, (double)m/100,n);
+            //Similarities.Inverted_Similarity(totalUsers, totalMovies, INVUS = new List[MAX_USERS], users, userMovies, usersRatingSet, (double)m/100, n);
             simTime4=startTime-System.currentTimeMillis();
             //System.out.println("aaa");
-            //Similarities.Print_Similarities(totalUsers, INVUS);
             //Similarities.Print_Similarities(totalUsers, US);
-            //For each User there is a sorted array with all its NN/FN calculated
 
+            //For each User there is a sorted array with all its NN/FN calculated
             startTime=System.currentTimeMillis();           //Set new timer
-            
             for (i=0;i<=totalUsers;i++)
             {
                 Collections.sort(US[i],Collections.reverseOrder());

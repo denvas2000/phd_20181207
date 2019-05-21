@@ -562,8 +562,10 @@ int Previous_User=0;
 int Last_Movie=0;             //The Movie ID the UserID last, concerning time, rated
 
 int User_Ratings_Sum=0;       //Sum of all rating values of a single UseiID
-int Min_Time = 0;             //Min time stamp of a UseiID
-int Max_Time = 0;             //Max time stamp of a UseiID
+//int Min_Time = 0;             //Min time stamp of a UseiID
+//int Max_Time = 0;             //Max time stamp of a UseiID
+int Min_Time = Integer.MAX_VALUE;             //Min time stamp of a UseiID
+int Max_Time = Integer.MIN_VALUE;             //Max time stamp of a UseiID
 int maxRating=1;
 int minRating=5;
 
