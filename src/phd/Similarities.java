@@ -13,6 +13,9 @@
  * When the main array userMovies (or more accurately user-item pairs array) transformed to HashTable in order
  * to accommodate memory restrictions, the speed of similarity testing has slowed down.
  *
+ * Ver 2.1 
+ * 1.Removed all setter/getter functions
+ * 2.Removed all code left from previous versions (those in comments)
  * Some observations about speed:
  * 1.HashTable.all and HashTable.retainAll methods are VERY SLOW. So merging of two sets is a crucial factor of the program execution speed.
  * Writing my own mergeSet function improved the speed about 40%, but it is still much slower (400%) than the original version (up to 1.4) where
@@ -28,6 +31,7 @@ package phd;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 //import static phd.FN_Amazon_Video_Games.usersRatingSet;
@@ -111,7 +115,7 @@ int totalUsers,
 int totalMovies,
 List<UserSimilarity>[] userSim,
 User[] users,
-Hashtable<CellCoor,UserMovie>  userMovies,
+HashMap<CellCoor,UserMovie>  userMovies,
 HashSet<Integer>[] usersRatingSet,
 double simBase,
 int commonMovies
@@ -267,7 +271,7 @@ int upper,
 int totalUsers, 
 List<UserSimilarity>[] userSim,
 User[] users,
-Hashtable<CellCoor,UserMovie>  userMovies,
+HashMap<CellCoor,UserMovie>  userMovies,
 HashSet<Integer>[] usersRatingSet,
 double simBase,
 int commonMovies
@@ -304,7 +308,7 @@ for (i=low;i<=upper;i++)
     //System.out.println(i+" "+users[i].MaxTimeStamp+" "+users[i].MinTimeStamp+" "+Global_Vars.MIN_TIMESPACE);
     //System.out.println(i+" "+users[i].getMaxTimeStamp()+" "+users[i].getMinTimeStamp()+" "+Global_Vars.MIN_TIMESPACE);
     
-    if ((users[i].getMaxTimeStamp()-users[i].getMinTimeStamp())>Global_Vars.MIN_TIMESPACE)
+    if ((users[i].MaxTimeStamp-users[i].MinTimeStamp)>Global_Vars.MIN_TIMESPACE)
        for (j=i+1;j<=totalUsers;j++)
        {
            
@@ -330,28 +334,21 @@ for (i=low;i<=upper;i++)
                 cell1.user=j;cell1.movie=k;
                 //System.out.println("Cells:"+cell0.user+" "+cell0.movie+" "+i+" "+j+" "+k);
                 //if (userMovies.containsKey(cell0) && userMovies.containsKey(cell1))
-                if (userMovies.containsKey(cell1))
+                //if (userMovies.containsKey(cell1))
+                tempUM2=userMovies.get(cell1);
+                if (!(tempUM2==null))
                 {
                     //System.out.println("aek1");
 
-                    tempUM2=userMovies.get(cell1);
+                    //tempUM2=userMovies.get(cell1); 
                     tempMovies++;
                     if (Global_Vars.WEIGHT_TYPE==1)
                     {
-                        /*tempWeight=(double)(userMovies.get(cell0).Time_Stamp-users[i].getMinTimeStamp())/(double)(users[i].getMaxTimeStamp()-users[i].getMinTimeStamp());
-                        userMovies.get(cell0).setWeight(tempWeight);   
-                        tempWeight=(double)(userMovies.get(cell1).Time_Stamp-users[j].getMinTimeStamp())/(double)(users[j].getMaxTimeStamp()-users[j].getMinTimeStamp());
-                        userMovies.get(cell1).setWeight(tempWeight); */
-                        
-                        /*tempWeight=(double)(userMovies.get(cell0).Time_Stamp-users[i].MinTimeStamp)/(double)(users[i].MaxTimeStamp-users[i].MinTimeStamp);
-                        userMovies.get(cell0).Weight=tempWeight;   */
 
                         tempWeight=(double)(tempUM1.Time_Stamp-users[i].MinTimeStamp)/(double)(users[i].MaxTimeStamp-users[i].MinTimeStamp);
                         tempUM1.Weight=tempWeight; 
                         
                         //-System.out.print(i+" "+k+" "+tempWeight+"<->");
-                        /*tempWeight=(double)(userMovies.get(cell1).Time_Stamp-users[j].MinTimeStamp)/(double)(users[j].MaxTimeStamp-users[j].MinTimeStamp);
-                        userMovies.get(cell1).Weight=tempWeight;*/
                         
                         tempWeight=(double)(tempUM2.Time_Stamp-users[j].MinTimeStamp)/(double)(users[j].MaxTimeStamp-users[j].MinTimeStamp);
                         tempUM2.Weight=tempWeight;
@@ -368,15 +365,6 @@ for (i=low;i<=upper;i++)
                         tempUM2.Weight=1;
                     }
                     
-                    
-                    /*numeratorSimij += (userMovies.get(cell0).getRating()-averageUI)*(userMovies.get(cell1).getRating()-averageUJ)*userMovies.get(cell0).getWeight()*userMovies.get(cell1).getWeight();
-                    denominatorPartA += (userMovies.get(cell0).getRating()-averageUI)*(userMovies.get(cell0).getRating()-averageUI);
-                    denominatorPartB += (userMovies.get(cell1).getRating()-averageUJ)*(userMovies.get(cell1).getRating()-averageUJ);*/
-                    
-                    /*numeratorSimij += (userMovies.get(cell0).Rating-averageUI)*(userMovies.get(cell1).Rating-averageUJ)*userMovies.get(cell0).Weight*userMovies.get(cell1).Weight;
-                    denominatorPartA += (userMovies.get(cell0).Rating-averageUI)*(userMovies.get(cell0).Rating-averageUI);
-                    denominatorPartB += (userMovies.get(cell1).Rating-averageUJ)*(userMovies.get(cell1).Rating-averageUJ);*/
-
                     numeratorSimij += (tempUM1.Rating-averageUI)*(tempUM2.Rating-averageUJ)*tempUM1.Weight*tempUM2.Weight;
                     
                     denominatorPartA += (tempUM1.Rating-averageUI)*(tempUM1.Rating-averageUI);
@@ -433,7 +421,7 @@ int totalUsers,
 int totalMovies,
 List<UserSimilarity>[] userSim,
 User[] users,
-Hashtable<CellCoor,UserMovie>  userMovies,
+HashMap<CellCoor,UserMovie>  userMovies,
 HashSet<Integer>[] usersRatingSet,
 double simBase,
 int commonMovies)
@@ -462,7 +450,7 @@ for (i=0;i<=totalUsers-1;i++)
 {    
             
     averageUI=users[i].UserInvertedAverageRating();            
-    if ((users[i].getMaxTimeStamp()-users[i].getMinTimeStamp())>Global_Vars.MIN_TIMESPACE)
+    if ((users[i].MaxTimeStamp-users[i].MinTimeStamp)>Global_Vars.MIN_TIMESPACE)
        for (j=i+1;j<=totalUsers;j++)
        {
            
@@ -493,10 +481,10 @@ for (i=0;i<=totalUsers-1;i++)
                     
                     if (Global_Vars.WEIGHT_TYPE==1)
                     {
-                        tempWeight=(double)(tempUM1.Time_Stamp-users[i].getMinTimeStamp())/(double)(users[i].getMaxTimeStamp()-users[i].getMinTimeStamp());
+                        tempWeight=(double)(tempUM1.Time_Stamp-users[i].MinTimeStamp)/(double)(users[i].MaxTimeStamp-users[i].MinTimeStamp);
                         tempUM1.setWeight(tempWeight);   
                         //System.out.print(j+" "+k+" "+tempWeight+"<->");
-                        tempWeight=(double)(tempUM2.Time_Stamp-users[j].getMinTimeStamp())/(double)(users[j].getMaxTimeStamp()-users[j].getMinTimeStamp());
+                        tempWeight=(double)(tempUM2.Time_Stamp-users[j].MinTimeStamp)/(double)(users[j].MaxTimeStamp-users[j].MinTimeStamp);
                         tempUM2.setWeight(tempWeight);   
                         //System.out.print(j+" "+k+" "+tempWeight+"<->");
                         //System.out.println(tempUM1.Time_Stamp+" "+users[i].getMinTimeStamp()+" "+users[i].getMaxTimeStamp());
@@ -554,7 +542,7 @@ int upper,
 int totalUsers, 
 List<UserSimilarity>[] userSim,
 User[] users,
-Hashtable<CellCoor,UserMovie>  userMovies,
+HashMap<CellCoor,UserMovie>  userMovies,
 HashSet<Integer>[] usersRatingSet,
 double simBase,
 int commonMovies)
@@ -668,158 +656,13 @@ for (i=low;i<=upper;i++)
  * @param userSim
  * @param similaritySign 
  */
-/*
-public static void Compute_Similarity (
-int totalUsers, 
-int totalMovies,
-List<UserSimilarity>[] userSim,
-User[] users,
-Hashtable<CellCoor,UserMovie>  userMovies,
-HashSet<Integer>[] usersRatingSet,
-int similaritySign,
-double simBase,
-int commonMovies)
-    
-{
-        
-int    i, j;
-double tempWeight, negWeight;
-int    tempMovies, temp_no3movies;
-double averageUI, averageUJ;                    //Hold average rating of user i and j, respectively
-double numeratorSimij, negNumeratorSimij, denominatorSimij;        //Numerator and Denominator of Similarity (Pearson) function.
-double denominatorPartA, denominatorPartB;      //Denominator consists of two parts        
-double Similarity, negSimilarity;
-double NO3_numeratorSimij, NO3_denominatorSimij;
-double NO3_denominatorPartA, NO3_denominatorPartB;
-double NO3_similarity;
-double maxSimValue=Integer.MIN_VALUE, MinSimValue=Integer.MAX_VALUE;
-HashSet<Integer> userRatingSet = new HashSet<>();   //Set containg for a specific user the Movies that has rated
-CellCoor cell0 = new CellCoor();
-CellCoor cell1 = new CellCoor();
-
-//System.out.println("Similarity"+simBase);
-for (i=0;i<=totalUsers;i++) 
-    userSim[i]=new ArrayList<>();
-
-for (i=0;i<=totalUsers-1;i++)
-{    
-            
-    averageUI=users[i].UserAverageRate();            
-    if ((users[i].getMaxTimeStamp()-users[i].getMinTimeStamp())>FN_100K_OLD.MIN_TIMESPACE)
-       for (j=i+1;j<=totalUsers;j++)
-       {
-
-            numeratorSimij=0.0;negNumeratorSimij=0.0;denominatorSimij=0.0;                    //Initializing variables used in computing similarity
-            denominatorPartA=0.0;denominatorPartB=0.0;
-            NO3_numeratorSimij=0;NO3_denominatorSimij=0;
-            NO3_denominatorPartA=0; NO3_denominatorPartB=0;
-
-            averageUJ=users[j].UserAverageRate();
-            tempMovies=0;temp_no3movies=0;
-                
-            //for (k=0;k<=totalMovies;k++)
-            userRatingSet=usersRatingSet[i];
-            for (int k: userRatingSet)            
-            {
-                cell0.user=i;cell0.movie=k;
-                cell1.user=j;cell1.movie=k;
-                if (!(userMovies.get(cell0)==null) && !(userMovies.get(cell1)==null))
-                {
-                    //System.out.println("OK");
-                    tempMovies++;
-                    
-                    if (FN_100K_OLD.NEG_WEIGHT_TYPE==0) 
-                        negWeight=1;
-                    else
-                        negWeight=Phd_Utils.Neg_Weight(userMovies.get(cell0).getRating(), userMovies.get(cell1).getRating());
-                    
-                    if (FN_100K_OLD.WEIGHT_TYPE==1)
-                    {
-                        tempWeight=(double)(userMovies.get(cell0).Time_Stamp-users[i].getMinTimeStamp())/(double)(users[i].getMaxTimeStamp()-users[i].getMinTimeStamp());
-                        userMovies.get(cell0).setWeight(tempWeight);   
-                        tempWeight=(double)(userMovies.get(cell1).Time_Stamp-users[j].getMinTimeStamp())/(double)(users[j].getMaxTimeStamp()-users[j].getMinTimeStamp());
-                        userMovies.get(cell1).setWeight(tempWeight);   
-                    }
-                    else
-                    {
-                        userMovies.get(cell0).setWeight(1);   
-                        userMovies.get(cell1).setWeight(1);   
-                    }
-                    
-                    
-                    numeratorSimij += (userMovies.get(cell0).getRating()-averageUI)*(userMovies.get(cell1).getRating()-averageUJ)*userMovies.get(cell0).getWeight()*userMovies.get(cell1).getWeight();
-                    negNumeratorSimij += (userMovies.get(cell0).getRating()-averageUI)*(userMovies.get(cell1).getRating()-averageUJ)*userMovies.get(cell0).getWeight()*userMovies.get(cell1).getWeight()*negWeight;
-                    denominatorPartA += (userMovies.get(cell0).getRating()-averageUI)*(userMovies.get(cell0).getRating()-averageUI);
-                    denominatorPartB += (userMovies.get(cell1).getRating()-averageUJ)*(userMovies.get(cell1).getRating()-averageUJ);
-
-                    if ((userMovies.get(cell0).getRating()!=3) && (userMovies.get(cell1).getRating()!=3) && (similaritySign==2))
-                    {
-                        temp_no3movies++;            
-                        NO3_numeratorSimij   += (userMovies.get(cell0).getRating()-averageUI)*(userMovies.get(cell1).getRating()-averageUJ)*userMovies.get(cell0).getWeight()*userMovies.get(cell1).getWeight()*negWeight;
-                        NO3_denominatorPartA += (userMovies.get(cell0).getRating()-averageUI)*(userMovies.get(cell0).getRating()-averageUI);
-                        NO3_denominatorPartB += (userMovies.get(cell1).getRating()-averageUJ)*(userMovies.get(cell1).getRating()-averageUJ);
-                    }
-                }
-                  
-            }//for k
-                
-            denominatorSimij= denominatorPartA * denominatorPartB;
-            Similarity=(double)(numeratorSimij/Math.sqrt(denominatorSimij));
-            negSimilarity=(double)(negNumeratorSimij/Math.sqrt(denominatorSimij));
-                
-            NO3_denominatorSimij= NO3_denominatorPartA * NO3_denominatorPartB;
-            NO3_similarity=(double)(NO3_numeratorSimij/Math.sqrt(NO3_denominatorSimij));
-                
-            //find min/max similarity values
-            if (MinSimValue>Similarity) MinSimValue=Similarity;
-            else
-            if (maxSimValue<Similarity) maxSimValue=Similarity;
-                
-            
-            //At least "commonMovies" common ratings
-            if (tempMovies>commonMovies)
-            {
-                if (Similarity>=simBase && similaritySign==1)    //Only Positive Similarities are Considered
-                {
-                    
-                        userSim[i].add(new UserSimilarity(i,j,Similarity));
-                        userSim[j].add(new UserSimilarity(j,i,Similarity));
-
-                } 
-                else    
-                   //Reverse Similarity
-                if (negSimilarity<=simBase && similaritySign==0)
-                {
-                    
-                    userSim[i].add(new UserSimilarity(i,j,negSimilarity));
-                    userSim[j].add(new UserSimilarity(j,i,negSimilarity));
-
-                } 
-                
-            }
-            
-            if (temp_no3movies>commonMovies)
-                if (NO3_similarity<=simBase && similaritySign==2)
-                    {
-                        userSim[i].add(new UserSimilarity(i,j,NO3_similarity));
-                        userSim[j].add(new UserSimilarity(j,i,NO3_similarity));                        
-                    }
-                        
-            
-        
-        }//for i
-
-}
-//System.out.println("max:"+absMaxTimeStamp+" min:"+absMinTimeStamp);
-}
-*/
 
 public static void Compute_Similarity (
 int totalUsers, 
 int totalMovies,
 List<UserSimilarity>[] userSim,
 User[] users,
-Hashtable<CellCoor,UserMovie>  userMovies,
+HashMap<CellCoor,UserMovie>  userMovies,
 HashSet<Integer>[] usersRatingSet,
 int similaritySign,
 double simBase,
@@ -857,7 +700,7 @@ for (i=0;i<=totalUsers-1;i++)
     //System.out.println(i+" "+users[i].MaxTimeStamp+" "+users[i].MinTimeStamp+" "+Global_Vars.MIN_TIMESPACE);
     //System.out.println(i+" "+users[i].getMaxTimeStamp()+" "+users[i].getMinTimeStamp()+" "+Global_Vars.MIN_TIMESPACE);       
 
-    if ((users[i].getMaxTimeStamp()-users[i].getMinTimeStamp())>FN_100K_OLD.MIN_TIMESPACE)
+    if ((users[i].getMaxTimeStamp()-users[i].getMinTimeStamp())>Phd_Hub_Hashtable.MIN_TIMESPACE)
        for (j=i+1;j<=totalUsers;j++)
        {
 
@@ -991,7 +834,7 @@ int upper,
 int totalUsers, 
 List<UserSimilarity>[] userSim,
 User[] users,
-Hashtable<CellCoor,UserMovie>  userMovies,
+HashMap<CellCoor,UserMovie>  userMovies,
 HashSet<Integer>[] usersRatingSet,
 int similaritySign,
 double simBase,

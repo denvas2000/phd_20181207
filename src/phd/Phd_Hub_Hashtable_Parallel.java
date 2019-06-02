@@ -20,7 +20,7 @@ Main features:  Reads a text file with limited users/ratings, compared to initia
                 Combined FN/NN
                 Improving ability to handle large data, through the use of hastables
                 One main class, for all data files. 
-                Time specific calculations, for improving time execution (see Classes for observations)                
+               Time specific calculations, for improving time execution (see Classes for observations)                
                 PARALLEL COMPUTATIONS (working area: Find the similar users)
 
 Next Version:   Refine simulations for more elaborate results
@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.HashMap;
 
 
 /**
@@ -73,7 +74,7 @@ static int MAX_MOVIES;       //Maximum Movies the program can handle
 //static final int TOTAL_RATINGS=100000;
 
 static User[] users;                                              //Store User Details (see class declaration)
-static Hashtable<CellCoor,UserMovie> userMovies;                  //Store User Ratings
+static HashMap<CellCoor,UserMovie> userMovies;                  //Store User Ratings
 static HashSet<Integer>[] usersRatingSet;                         //Array Set containg for each user the Movies that has rated
 
 
@@ -94,7 +95,7 @@ int option,
 int totalUsers,
 List<UserSimilarity>[] userSim,
 User[] users,
-Hashtable<CellCoor,UserMovie> userMovies,
+HashMap<CellCoor,UserMovie> userMovies,
 HashSet<Integer>[] usersRatingSet,
 int similaritySign,
 double simBase,
@@ -109,9 +110,10 @@ int lowbound=0;
 int upperbound=-1;
 
 //A. Similarities have to be synchronized, as THREAD functions may overlap
+long firstTime=System.currentTimeMillis();
 for (i=0;i<=totalUsers;i++)
     userSim[i]=Collections.synchronizedList(new ArrayList<>());
-
+System.out.println("Synchr:"+Long.toString(firstTime-System.currentTimeMillis()));
 // THREAD SECTION: SPLIT SIMILARITY COMPUTATIONS TO SEVERAL THREADS
 
 //B.Split Job to THREADS. Find low and upper bounds to assign task
@@ -123,8 +125,10 @@ for (i=0;i<=THREADS-1;i++)
     PS[i]= new Parallel_Sim(option,lowbound, upperbound, totalUsers, userSim, users, userMovies, usersRatingSet, similaritySign, simBase,commonMovies);
     threadPool[i]= new Thread(PS[i],"t"+String.valueOf(i));
 }
-            usersRatingSet = new HashSet[MAX_USERS];
-            userMovies = new Hashtable(134999); 
+
+//usersRatingSet = new HashSet[MAX_USERS];
+//userMovies = new Hashtable(134999); 
+
 //  Start all threads
 for (i=0;i<=THREADS-1;i++)
 {
@@ -133,6 +137,7 @@ for (i=0;i<=THREADS-1;i++)
 
 //  Wait all threads to come to an end
 try {
+    
     System.out.println("Waiting for threads to finish.");
     for (i=0;i<=THREADS-1;i++)
     {
@@ -225,7 +230,7 @@ switch (datasetSelection) {
             MAX_USERS= 945; 
             users = new User[MAX_USERS];
             usersRatingSet = new HashSet[MAX_USERS];
-            userMovies = new Hashtable(134999);    //Realsize/0.75 for good performance
+            userMovies = new HashMap(134999);    //Realsize/0.75 for good performance
                                                    //HAS to BE a PRIME or odd.I use 134999.
             outFileResults="src/phd/Results/Results_Movielens_100K_Old_Hash_Parallel.txt"; 
             outFileTiming ="src/phd/Timings/Timing_Movielens_100K_Old_Hash_Parallel.txt"; 
@@ -234,7 +239,7 @@ switch (datasetSelection) {
             MAX_USERS= 6045; 
             users = new User[MAX_USERS];
             usersRatingSet = new HashSet[MAX_USERS];
-            userMovies = new Hashtable(1335991);    //Realsize/0.75 for good performance
+            userMovies = new HashMap(1335991);    //Realsize/0.75 for good performance
                                                     //HAS to BE a PRIME or odd.I use 1335991.
             outFileResults="src/phd/Results/Results_Movielens_1M_Old_Hash_Parallel.txt"; 
             outFileTiming ="src/phd/Timings/Timing_Movielens_1M_Old_Hash_Parallel.txt"; 
@@ -244,7 +249,7 @@ switch (datasetSelection) {
             MAX_USERS= 8060; 
             users = new User[MAX_USERS];
             usersRatingSet = new HashSet[MAX_USERS];
-            userMovies = new Hashtable(210011);    //Realsize/0.75 for good performance
+            userMovies = new HashMap(210011);    //Realsize/0.75 for good performance
                                                     //HAS to BE a PRIME or odd.I use 1335991.
             outFileResults="src/phd/Results/Results_Amazon_VG_Hash_Par.txt"; 
             outFileTiming ="src/phd/Timings/Timing_Amazon_VG_Hash_Par.txt"; 

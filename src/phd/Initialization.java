@@ -11,6 +11,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.Scanner;
 import phd.Global_Vars;
@@ -104,7 +105,7 @@ public static void Compute_Inverse(
 int totalUsers, 
 int totalMovies,
 User[] users, 
-Hashtable<CellCoor,UserMovie>  userMovies) {
+HashMap<CellCoor,UserMovie>  userMovies) {
 
 int i, j;
 int tempRating;
@@ -708,7 +709,7 @@ try {   //Read Files. Initiate tables
 public static int[] Data_Initialisation_General(
 String dataFile, 
 User[] users, 
-Hashtable<CellCoor,UserMovie>  userMovies,
+HashMap<CellCoor,UserMovie>  userMovies,
 HashSet<Integer>[] usersRatingSet, 
 int absMinTimeStamp, 
 int absMaxTimeStamp) {

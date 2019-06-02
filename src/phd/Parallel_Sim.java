@@ -9,6 +9,7 @@ package phd;
 
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -22,7 +23,7 @@ public class Parallel_Sim implements Runnable{
  int totalUsers;
  List<UserSimilarity>[]  userSim;
  User[] users;
- Hashtable<CellCoor,UserMovie> userMovies;
+ HashMap<CellCoor,UserMovie> userMovies;
  HashSet<Integer>[] usersRatingSet;
  int similaritySign;
  double simBase;
@@ -35,7 +36,7 @@ int upper,
 int totalUsers,
 List<UserSimilarity>[] userSim,
 User[] users,
-Hashtable<CellCoor,UserMovie> userMovies,
+HashMap<CellCoor,UserMovie> userMovies,
 HashSet<Integer>[] usersRatingSet,
 int similaritySign,
 double simBase,

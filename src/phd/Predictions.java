@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 
 /**
@@ -43,7 +44,7 @@ int totalUsers,
 int totalMovies,
 List<UserSimilarity>[] userSim,
 User[] Users,
-Hashtable<CellCoor,UserMovie>  userMovies,
+HashMap<CellCoor,UserMovie>  userMovies,
 int predictionSign,
 int bestNeigh)
 
@@ -159,7 +160,7 @@ int totalUsers,
 int totalMovies,
 List<UserSimilarity>[] userSim,
 User[] users,
-Hashtable<CellCoor,UserMovie>  userMovies,
+HashMap<CellCoor,UserMovie>  userMovies,
 int bestNeigh)
 
 {
@@ -255,14 +256,14 @@ List<UserSimilarity>[] posSim,
 List<UserSimilarity>[] negSim,
 List<UserSimilarity>[] comSim,
 User[] Users,
-Hashtable<CellCoor,UserMovie>  userMovies,
+HashMap<CellCoor,UserMovie>  userMovies,
 int bestNeigh)              //Select just the "bestNeigh" (absolute number of most similar heighbors)
 
 {
 
 int i, k, l;    
 int combinedNeighbors=0;
-List<UserSimilarity>[] combinedSim = new List[FN_100K_OLD.MAX_USERS];    //Array of list holding for each user the FN
+List<UserSimilarity>[] combinedSim = new List[Phd_Hub_Hashtable.MAX_USERS];    //Array of list holding for each user the FN
 List<UserSimilarity> posList = new ArrayList<>();
 List<UserSimilarity> negList = new ArrayList<>();
 List<UserSimilarity> combinedList;
@@ -381,7 +382,7 @@ int totalUsers,
 int totalMovies,
 List<UserSimilarity>[] userSim,
 User[] Users,
-Hashtable<CellCoor,UserMovie>  userMovies,
+HashMap<CellCoor,UserMovie>  userMovies,
 int bestNeigh)
 
 {

@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.HashMap;
 
 
 /**
@@ -74,7 +75,7 @@ static final int MAX_MOVIES=27000;       //Maximum Movies the program can handle
 static final int TOTAL_RATINGS=100000;
 
 static User[] users;                                              //Store User Details (see class declaration)
-static Hashtable<CellCoor,UserMovie> userMovies;                  //Store User Ratings
+static HashMap<CellCoor,UserMovie> userMovies;                  //Store User Ratings
 static HashSet<Integer>[] usersRatingSet;                         //Array Set containg for each user the Movies that has rated
 
 
@@ -160,13 +161,13 @@ String outFileTiming = new String();
 // Initialize Main Variables
 //
 
-datasetSelection=3;
+datasetSelection=4;
 switch (datasetSelection) {
     case 1: datasetFile="/home/denis/Documents/Datasets/01.Movielens_100k_old/ratings_Movielens_100K_OLD_Sorted_Pure.txt";
             MAX_USERS= 945; 
             users = new User[MAX_USERS];
             usersRatingSet = new HashSet[MAX_USERS];
-            userMovies = new Hashtable(134999);    //Realsize/0.75 for good performance
+            userMovies = new HashMap(134999);    //Realsize/0.75 for good performance
                                                    //HAS to BE a PRIME or odd.I use 134999.
             outFileResults="src/phd/Results/Results_Movielens_100K_Old_Hash.txt"; 
             outFileTiming ="src/phd/Timings/Timing_Movielens_100K_Old_Hash.txt"; 
@@ -175,7 +176,7 @@ switch (datasetSelection) {
             MAX_USERS= 6045; 
             users = new User[MAX_USERS];
             usersRatingSet = new HashSet[MAX_USERS];
-            userMovies = new Hashtable(1335991);    //Realsize/0.75 for good performance
+            userMovies = new HashMap(1335991);    //Realsize/0.75 for good performance
                                                     //HAS to BE a PRIME or odd.I use 1335991.
             outFileResults="src/phd/Results/Results_Movielens_1M_Old_Hash.txt"; 
             outFileTiming ="src/phd/Timings/Timing_Movielens_1M_Old_Hash.txt"; 
@@ -185,13 +186,22 @@ switch (datasetSelection) {
             MAX_USERS= 8060; 
             users = new User[MAX_USERS];
             usersRatingSet = new HashSet[MAX_USERS];
-            userMovies = new Hashtable(210011);    //Realsize/0.75 for good performance
+            userMovies = new HashMap(210011);    //Realsize/0.75 for good performance
                                                     //HAS to BE a PRIME or odd.I use 1335991.
             outFileResults="src/phd/Results/Results_Amazon_VG_Hash_Hub.txt"; 
             outFileTiming ="src/phd/Timings/Timing_Amazon_VG_Hash_Hub.txt"; 
             //You have to set Heapsize to at least 4096MB (-Xms4096m)
             break;
-    case 4: datasetFile="/home/denis/Documents/Datasets/01.Movielens_100k_old/ratings_Movielens_100K_OLD_Sorted.txt";break;
+    case 4: datasetFile="/home/denis/Documents/Datasets/04.Amazon_Books/ratings_Books_Final.tab";
+            MAX_USERS= 294800; 
+            users = new User[MAX_USERS];
+            usersRatingSet = new HashSet[MAX_USERS];
+            userMovies = new HashMap(8681003);    //Realsize/0.75 for good performance
+                                                    //HAS to BE a PRIME or odd.I use 1335991.
+            outFileResults="src/phd/Results/Results_Amazon_Book_Hash_Hub.txt"; 
+            outFileTiming ="src/phd/Timings/Timing_Amazon_Book_Hash_Hub.txt"; 
+            //You have to set Heapsize to at least 4096MB (-Xms4096m)
+            break;
 } //switch
 
 System.out.println("Variables initialization finished. Program execution started..." );
@@ -210,6 +220,9 @@ startTime=System.currentTimeMillis();
 totals=Initialization.Data_Initialisation_General(datasetFile, users, userMovies, usersRatingSet, absMinTimeStamp, absMaxTimeStamp);
 initTime=startTime-System.currentTimeMillis();  //Estimate Initialization Time
 System.out.println("Size after initialization:"+userMovies.size());
+//System.out.println(startTime);
+//System.out.println(initTime);
+//System.out.write("Initialization time (Read File, Fill in User, UserMovies tables): "+Long.toString(initTime));
 
 totalUsers=totals[0];totalMovies=totals[1];     
 //Phd_Utils.Print_Ratings(totalUsers, totalMovies, users, userMovies);

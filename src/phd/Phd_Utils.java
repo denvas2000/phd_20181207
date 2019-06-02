@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -36,7 +37,7 @@ public static void Strict_Similarities (
 int totalUsers, 
 List<UserSimilarity>[] userSim, 
 User[] Users, 
-Hashtable<CellCoor,UserMovie>  userMovies){
+HashMap<CellCoor,UserMovie>  userMovies){
 
 int  i;
 int lastMovie;

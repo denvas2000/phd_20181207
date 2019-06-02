@@ -1,18 +1,36 @@
 Max Similarity Value: 0.0 Min Similarity Value:0.0
 
-Initialization time (Read File, Fill in User, UserMovies tables): -3671
-Calculate time to find Similarities (NN): -4511
-Calculate time to find Similarities (FN): 0
-Calculate time to find Similarities (NO3 FN): 0
-Calculate time to find Similarities (Dennis FN): 0
-Sort Similarity arrays for all users: -3
-Strict Similarities Computational Time: -3
-Calculate time to make Predictions (NN): 0
-Calculate time to make Predictions (FN): 0
-Calculate time to make Predictions (NO3 FN): 0
-Calculate time to make Predictions (FN Dennis): -1
-Calculate time to make Predictions (Combined NN - FN Dennis): 0
-Total Time: -8241
+Initialization time (Read File, Fill in User, UserMovies tables): -4277
+Calculate time to find Similarities (NN): -6459
+Calculate time to find Similarities (FN): -3713
+Calculate time to find Similarities (NO3 FN): -3247
+Calculate time to find Similarities (Dennis FN): -3750
+Sort Similarity arrays for all users: -636
+Strict Similarities Computational Time: -604
+Calculate time to make Predictions (NN): -47
+Calculate time to make Predictions (FN): -30
+Calculate time to make Predictions (NO3 FN): -24
+Calculate time to make Predictions (FN Dennis): -50
+Calculate time to make Predictions (Combined NN - FN Dennis): -202
+Total Time: -23107
+********************************************************
+********************************************************
+
+Max Similarity Value: 0.0 Min Similarity Value:0.0
+
+Initialization time (Read File, Fill in User, UserMovies tables): -4277
+Calculate time to find Similarities (NN): -3890
+Calculate time to find Similarities (FN): -3492
+Calculate time to find Similarities (NO3 FN): -2876
+Calculate time to find Similarities (Dennis FN): -3555
+Sort Similarity arrays for all users: -206
+Strict Similarities Computational Time: -429
+Calculate time to make Predictions (NN): -4
+Calculate time to make Predictions (FN): -48
+Calculate time to make Predictions (NO3 FN): -33
+Calculate time to make Predictions (FN Dennis): -66
+Calculate time to make Predictions (Combined NN - FN Dennis): -99
+Total Time: -37813
 ********************************************************
 ********************************************************
 
